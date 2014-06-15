@@ -8,6 +8,10 @@ requirements
 The following Python module(s):
 -MDAnalysis
 
+usage
+-----
+python thickness --help
+
 features
 --------
 -evolution of bilayer thickness
