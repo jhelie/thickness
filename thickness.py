@@ -383,6 +383,8 @@ else:
 lipids_nff_sele["both"]["all"]=lipids_nff_sele["lower"]["all"]+lipids_nff_sele["upper"]["all"]
 lipids_nff_sele_nb["both"]["all"]=lipids_nff_sele["both"]["all"].numberOfResidues()
 
+print "\nInitialising data structures..."
+
 # Identify lipid species
 #=======================
 lipids_nff_species={}
@@ -390,6 +392,11 @@ lipids_nff_species_nb={}
 for l in ["lower","upper","both"]:
 	lipids_nff_species[l]=list(numpy.unique(lipids_nff_sele[l]["all"].resnames()))
 	lipids_nff_species_nb[l]=numpy.size(lipids_nff_species[l])
+membrane_comp={}
+for l in ["lower","upper"]:
+	membrane_comp[l]="  -" + str(l) + " (" + str(lipids_nff_sele[l]["all"].numberOfResidues()) + " lipids): "
+	for s in lipids_nff_species[l]:
+		membrane_comp[l]+= str(s) + "(" + str(lipids_nff_sele[l]["all"].selectAtoms("resname " + str(s)).numberOfResidues()) + "),"
 
 #associate colours to lipids
 #===========================
@@ -564,30 +571,6 @@ def smooth_data():
 # FUNCTIONS: outputs
 ################################################################################################################################################
 
-#case: gro file
-#==============
-def write_thickness_nff_stat():
-
-	filename_details=os.getcwd() + '/' + str(args.output_folder) + '/1_species/1_0_thickness_nff.stat'
-	output_stat = open(filename_details, 'w')		
-	output_stat.write("[thickness statistics - written by thickness v" + str(version_nb) + "]\n")
-	output_stat.write("\n")
-	output_stat.write("Bilayer thickness:\n")
-	output_stat.write("-----------------\n")
-	output_stat.write("avg=" + str(round(numpy.average(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
-	output_stat.write("std=" + str(round(numpy.std(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
-	output_stat.write("max=" + str(round(numpy.max(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
-	output_stat.write("min=" + str(round(numpy.min(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
-	output_stat.write("\n")
-	output_stat.write("Average bilayer thickness for each specie:\n")
-	output_stat.write("------------------------------------------\n")
-	for s in lipids_nff_species["both"]:
-		output_stat.write(str(s) + "	" + str(round(numpy.average(lipids_nff_thickness_avg[s]),2)) + "\n")
-	output_stat.write("\n")
-	output_stat.close()
-	
-	return
-
 #case: xtc file
 #==============
 def write_thickness_nff_xvg():
@@ -742,6 +725,75 @@ def graph_thickness_nff_xvg_smoothed():
 
 #annotations
 #===========
+def write_frame_stat(f_nb, f_index, t):
+
+	#case: gro file or xtc summary
+	#=============================
+	if f_index=="all" and t=="all":	
+		#create file
+		filename_details=os.getcwd() + '/' + str(args.output_folder) + '/1_species/1_0_thickness_nff.stat'
+		output_stat = open(filename_details, 'w')		
+		output_stat.write("[thickness statistics - written by thickness v" + str(version_nb) + "]\n")
+		output_stat.write("\n")
+		
+		#general info
+		output_stat.write("1. membrane composition: \n")
+		output_stat.write(membrane_comp["upper"][:-1] + "\n")
+		output_stat.write(membrane_comp["lower"][:-1] + "\n")	
+		if args.xtcfilename!="no":
+			output_stat.write("\n")
+			output_stat.write("2. nb frames processed:	" + str(nb_frames_processed) + " (" + str(nb_frames_xtc) + " frames in xtc, step=" + str(args.frames_dt) + ")\n")
+		output_stat.write("\n")
+		
+		#results data
+		output_stat.write("Bilayer thickness:\n")
+		output_stat.write("-----------------\n")
+		output_stat.write("avg=" + str(round(numpy.average(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
+		output_stat.write("std=" + str(round(numpy.std(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
+		output_stat.write("max=" + str(round(numpy.max(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
+		output_stat.write("min=" + str(round(numpy.min(lipids_nff_thickness["all_values"]["all_frames"]),2)) + "\n")
+		output_stat.write("\n")
+		output_stat.write("Average bilayer thickness for each specie:\n")
+		output_stat.write("------------------------------------------\n")
+		for s in lipids_nff_species["both"]:
+			output_stat.write(str(s) + "	" + str(round(numpy.average(lipids_nff_thickness_avg[s]),2)) + "\n")
+		output_stat.write("\n")
+		output_stat.close()
+
+	#case: xtc snapshot
+	#==================
+	else:
+		#create file
+		filename_details=os.getcwd() + '/' + str(args.output_folder) + '/2_snapshots/' + args.xtcfilename[:-4] + '_annotated_thickness_' + str(int(t)).zfill(5) + 'ns.stat'
+		output_stat = open(filename_details, 'w')		
+		output_stat.write("[thickness statistics - written by thickness v" + str(version_nb) + "]\n")
+		output_stat.write("\n")
+		
+		#general info
+		output_stat.write("1. membrane composition: \n")
+		output_stat.write(membrane_comp["upper"][:-1] + "\n")
+		output_stat.write(membrane_comp["lower"][:-1] + "\n")	
+		output_stat.write("\n")
+		output_stat.write("2. nb frames processed:	" + str(nb_frames_processed) + " (" + str(nb_frames_xtc) + " frames in xtc, step=" + str(args.frames_dt) + ")\n")
+		output_stat.write("\n")
+		output_stat.write("3. time: " + str(t) + "ns (frame " + str(f_nb) + "/" + str(nb_frames_xtc) + ")\n")		
+		output_stat.write("\n")
+		
+		#results data
+		output_stat.write("Bilayer thickness:\n")
+		output_stat.write("-----------------\n")
+		output_stat.write("avg=" + str(round(numpy.average(lipids_nff_thickness["all_values"][f_index]),2)) + "\n")
+		output_stat.write("std=" + str(round(numpy.std(lipids_nff_thickness["all_values"][f_index]),2)) + "\n")
+		output_stat.write("max=" + str(round(numpy.max(lipids_nff_thickness["all_values"][f_index]),2)) + "\n")
+		output_stat.write("min=" + str(round(numpy.min(lipids_nff_thickness["all_values"][f_index]),2)) + "\n")
+		output_stat.write("\n")
+		output_stat.write("Average bilayer thickness for each specie:\n")
+		output_stat.write("------------------------------------------\n")
+		for s in lipids_nff_species["both"]:
+			output_stat.write(str(s) + "	" + str(round(lipids_nff_thickness_avg[s][f_index],2)) + "	(" + str(round(lipids_nff_thickness_std[s][f_index],2)) + ")\n")
+		output_stat.write("\n")
+		output_stat.close()		
+	return
 def write_frame_snapshot(f_index,t):
 
 	#store order parameter info in beta factor field
@@ -770,12 +822,11 @@ def write_frame_annotation(f_index,t):
 	output_stat = open(filename_details, 'w')		
 
 	#create selection string
-	tmp_VMD_sele_string=str(lipids_nff_selection_VMD_string["lower"][0])
-	for r_index in range(1,lipids_nff_sele_nb["lower"]["all"]):
-		tmp_VMD_sele_string+="." + str(lipids_nff_selection_VMD_string["lower"][r_index])
-	for r_index in range(0,lipids_nff_sele_nb["upper"]["all"]):
-		tmp_VMD_sele_string+="." + str(lipids_nff_selection_VMD_string["upper"][r_index])
-	output_stat.write(tmp_VMD_sele_string + "\n")
+	tmp_sele_string=""
+	for l in ["lower","upper"]:
+		for r_index in range(0,lipids_nff_sele_nb[l]["all"]):
+			tmp_sele_string+="." + str(lipids_nff_selection_VMD_string[l][r_index])
+	output_stat.write(tmp_sele_string[1:] + "\n")
 
 	#write min and max boundaries of thickness
 	output_stat.write(str(round(numpy.min(lipids_nff_thickness["all_values"][f_index]),2)) + ";" + str(round(numpy.max(lipids_nff_thickness["all_values"][f_index]),2)) + "\n")
@@ -811,6 +862,7 @@ def write_xtc_snapshots():
 			sys.stdout.write(progress)
 			if ((ts.frame-1) % args.frames_dt)==0:
 				if ((loc_nb_frames_processed) % args.frames_write_dt)==0 or loc_nb_frames_processed==nb_frames_processed-1:
+					write_frame_stat(ts.frame, loc_nb_frames_processed, ts.time/float(1000))
 					write_frame_snapshot(loc_nb_frames_processed, ts.time/float(1000))
 					write_frame_annotation(loc_nb_frames_processed, ts.time/float(1000))
 				loc_nb_frames_processed+=1
@@ -856,17 +908,17 @@ def write_xtc_annotation():
 # ALGORITHM : Browse trajectory and process relevant frames
 ################################################################################################################################################
 
+print "\nCalculating thickness..."
+
 #case: structure only
 #====================
 if args.xtcfilename=="no":
-	print "\nCalculating thickness..."
 	time_stamp[1]=0
 	calc_thickness(0)
 
 #case: browse xtc frames
 #=======================
 else:
-	print "\nBrowsing trajectory..."
 	for ts in U.trajectory:
 		
 		#case: frames before specified time boundaries
@@ -899,12 +951,11 @@ else:
 
 print "\nWriting outputs..."
 
-print " -writing statistics..."
-write_thickness_nff_stat()
-
 #case: gro file
 #==============
 if args.xtcfilename=="no":
+	print " -writing statistics..."
+	write_frame_stat(1,"all","all")
 	print " -writing annotated pdb..."
 	write_frame_snapshot(0,0)
 	write_frame_annotation(0,0)
@@ -914,6 +965,9 @@ if args.xtcfilename=="no":
 else:
 	#sort and if necessary smooth data
 	smooth_data()
+	#writing statistics
+	print " -writing statistics..."
+	write_frame_stat(1,"all","all")
 	#output cluster snapshots
 	write_xtc_snapshots()
 	#write annotation files for VMD
