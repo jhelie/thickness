@@ -1,0 +1,15 @@
+thickness
+=========
+
+Python script to calculate lipid bilayer thickness from MD simulations
+
+requirements
+------------
+The following Python module(s):
+-MDAnalysis
+
+features
+--------
+-evolution of bilayer thickness
+-statistics and graphs by lipid specie
+-output files for visualisation in VMD
