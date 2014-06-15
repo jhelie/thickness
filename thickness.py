@@ -204,6 +204,9 @@ if args.xtcfilename=="no":
 	elif '-e' in sys.argv:
 		print "Error: -e option specified but no xtc file specified."
 		sys.exit(1)
+	elif '-w' in sys.argv:
+		print "Error: -w option specified but no xtc file specified."
+		sys.exit(1)
 	elif '--smooth' in sys.argv:
 		print "Error: --smooth option specified but no xtc file specified."
 		sys.exit(1)
