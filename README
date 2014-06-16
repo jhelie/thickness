@@ -14,6 +14,7 @@ python thickness --help
 
 features
 --------
+-actual thickness based on euclidian distance (not a difference along the z axis), so deforming system can be handled
 -evolution of bilayer thickness
 -statistics and graphs by lipid specie
 -output files for visualisation in VMD
