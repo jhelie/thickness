@@ -43,7 +43,7 @@ MDAnalysis.core.flags['use_KDTree_routines'] = False
 
 #create parser
 #=============
-version_nb="2.0.0"
+version_nb="0.1.0"
 parser = argparse.ArgumentParser(prog='thickness', usage='', add_help=False, formatter_class=argparse.RawDescriptionHelpFormatter, description=\
 '''
 ********************************************
@@ -137,7 +137,7 @@ parser.add_argument('--neighbours', nargs=1, dest='thick_nb_neighbours', default
 parser.add_argument('--smooth', nargs=1, dest='nb_smoothing', default=[0], type=int, help=argparse.SUPPRESS)
 
 #lipids identification
-parser.add_argument('--flipflops', nargs=1, dest='selection_file_ff', default=['no'], type=float, help=argparse.SUPPRESS)
+parser.add_argument('--flipflops', nargs=1, dest='selection_file_ff', default=['no'], help=argparse.SUPPRESS)
 parser.add_argument('--forcefield', dest='forcefield_opt', choices=['martini'], default='martini', help=argparse.SUPPRESS)
 parser.add_argument('--no-opt', dest='cutoff_leaflet', action='store_false', help=argparse.SUPPRESS)
 
@@ -191,7 +191,7 @@ if not os.path.isfile(args.grofilename):
 if args.colour_file!="no" and not os.path.isfile(args.colour_file):
 	print "Error: file " + str(args.colour_file) + " not found."
 	sys.exit(1)
-if args.selection_file_ff!="no" and not os.path.isfile(selection_file_ff):
+if args.selection_file_ff!="no" and not os.path.isfile(args.selection_file_ff):
 	print "Error: file " + str(args.selection_file_ff) + " not found."
 	sys.exit(1)
 if args.xtcfilename=="no":
@@ -340,7 +340,7 @@ if args.selection_file_ff!="no":
 			else:
 				sele_all_nff_string+=" or (resname " + str(l_type) + " and resid " + str(l_indx) + ")"
 		except:
-			print "Error: invalid flipflopping lipid selection string."
+			print "Error: invalid flipflopping lipid selection string on line " + str(l+1) + ": '" + lines[l][:-1] + "'"
 			sys.exit(1)
 	sele_all_nff_string+=")"
 #case: no ff lipids selection file specified
@@ -576,13 +576,13 @@ def smooth_data():
 
 #case: xtc file
 #==============
-def write_thickness_nff_xvg():
+def write_thickness_xvg():
 	
-	filename_txt=os.getcwd() + '/' + str(args.output_folder) + '/1_species/xvg/1_2_thickness_nff_species.txt'
-	filename_xvg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/xvg/1_2_thickness_nff_species.xvg'
+	filename_txt=os.getcwd() + '/' + str(args.output_folder) + '/1_species/xvg/1_2_thickness_species.txt'
+	filename_xvg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/xvg/1_2_thickness_species.xvg'
 	output_txt = open(filename_txt, 'w')
 	output_txt.write("@[lipid tail order parameters statistics - written by thickness v" + str(version_nb) + "]\n")
-	output_txt.write("@Use this file as the argument of the -c option of the script 'xvg_animate' in order to make a time lapse movie of the data in 1_2_thickness_nff_species.xvg.\n")
+	output_txt.write("@Use this file as the argument of the -c option of the script 'xvg_animate' in order to make a time lapse movie of the data in 1_2_thickness_species.xvg.\n")
 	output_xvg = open(filename_xvg, 'w')
 	output_xvg.write("@ title \"Evolution of bilayer thickness by lipid specie\n")
 	output_xvg.write("@ xaxis  label \"time (ns)\"\n")
@@ -598,11 +598,11 @@ def write_thickness_nff_xvg():
 	for s_index in range(0,lipids_nff_species_nb["both"]):
 		s=lipids_nff_species["both"][s_index]
 		output_xvg.write("@ s" + str(s_index) + " legend \"" + str(s) + " (avg)\"\n")
-		output_txt.write("1_2_thickness_nff_species.xvg," + str(s_index+1) + "," + str(s) + " (avg)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
+		output_txt.write("1_2_thickness_species.xvg," + str(s_index+1) + "," + str(s) + " (avg)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
 	for s_index in range(0,lipids_nff_species_nb["both"]):
 		s=lipids_nff_species["both"][s_index]
 		output_xvg.write("@ s" + str(lipids_nff_species_nb["both"]+s_index) + " legend \"" + str(s) + " (std)\"\n")
-		output_txt.write("1_2_thickness_nff_species.xvg," + str(lipids_nff_species_nb["both"]+s_index+1) + "," + str(s) + " (std)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
+		output_txt.write("1_2_thickness_species.xvg," + str(lipids_nff_species_nb["both"]+s_index+1) + "," + str(s) + " (std)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
 	output_txt.close()
 	for frame in sorted(time_stamp.iterkeys()):
 		results=str(time_stamp[frame])
@@ -615,13 +615,13 @@ def write_thickness_nff_xvg():
 	output_xvg.close()
 
 	return
-def write_thickness_nff_xvg_smoothed():
+def write_thickness_xvg_smoothed():
 	
-	filename_txt=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/xvg/1_4_thickness_nff_species_smoothed.txt'
-	filename_xvg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/xvg/1_4_thickness_nff_species_smoothed.xvg'
+	filename_txt=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/xvg/1_4_thickness_species_smoothed.txt'
+	filename_xvg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/xvg/1_4_thickness_species_smoothed.xvg'
 	output_txt = open(filename_txt, 'w')
 	output_txt.write("@[lipid tail order parameters statistics - written by thickness v" + str(version_nb) + "]\n")
-	output_txt.write("@Use this file as the argument of the -c option of the script 'xvg_animate' in order to make a time lapse movie of the data in 1_4_thickness_nff_species_smoothed.xvg.\n")
+	output_txt.write("@Use this file as the argument of the -c option of the script 'xvg_animate' in order to make a time lapse movie of the data in 1_4_thickness_species_smoothed.xvg.\n")
 	output_xvg = open(filename_xvg, 'w')
 	output_xvg.write("@ title \"Evolution of bilayer thickness by lipid specie\n")
 	output_xvg.write("@ xaxis  label \"time (ns)\"\n")
@@ -637,11 +637,11 @@ def write_thickness_nff_xvg_smoothed():
 	for s_index in range(0,lipids_nff_species_nb["both"]):
 		s=lipids_nff_species["both"][s_index]
 		output_xvg.write("@ s" + str(s_index) + " legend \"" + str(s) + " (avg)\"\n")
-		output_txt.write("1_4_thickness_nff_species_smoothed.xvg," + str(s_index+1) + "," + str(s) + " (avg)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
+		output_txt.write("1_4_thickness_species_smoothed.xvg," + str(s_index+1) + "," + str(s) + " (avg)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
 	for s_index in range(0,lipids_nff_species_nb["both"]):
 		s=lipids_nff_species["both"][s_index]
 		output_xvg.write("@ s" + str(lipids_nff_species_nb["both"]+s_index) + " legend \"" + str(s) + " (std)\"\n")
-		output_txt.write("1_4_thickness_nff_species_smoothed.xvg," + str(lipids_nff_species_nb["both"]+s_index+1) + "," + str(s) + " (std)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
+		output_txt.write("1_4_thickness_species_smoothed.xvg," + str(lipids_nff_species_nb["both"]+s_index+1) + "," + str(s) + " (std)," + mcolors.rgb2hex(colours_lipids[s]) + "\n")
 	output_txt.close()
 	for frame_index in range(0, len(time_smoothed)):
 		results=str(time_smoothed[frame_index])
@@ -653,12 +653,12 @@ def write_thickness_nff_xvg_smoothed():
 	output_xvg.close()
 
 	return
-def graph_thickness_nff_xvg():
+def graph_thickness_xvg():
 	
 	#create filenames
 	#----------------
-	filename_png=os.getcwd() + '/' + str(args.output_folder) + '/1_species/png/1_1_thickness_nff.png'
-	filename_svg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/1_1_thickness_nff.svg'
+	filename_png=os.getcwd() + '/' + str(args.output_folder) + '/1_species/png/1_1_thickness.png'
+	filename_svg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/1_1_thickness.svg'
 	
 	#create figure
 	#-------------
@@ -689,12 +689,12 @@ def graph_thickness_nff_xvg():
 	plt.close()
 	
 	return
-def graph_thickness_nff_xvg_smoothed():
+def graph_thickness_xvg_smoothed():
 	
 	#create filenames
 	#----------------
-	filename_png=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/png/1_3_thickness_nff.png'
-	filename_svg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/1_3_thickness_nff.svg'
+	filename_png=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/png/1_3_thickness.png'
+	filename_svg=os.getcwd() + '/' + str(args.output_folder) + '/1_species/smoothed/1_3_thickness.svg'
 	
 	#create figure
 	#-------------
@@ -734,7 +734,7 @@ def write_frame_stat(f_nb, f_index, t):
 	#=============================
 	if f_index=="all" and t=="all":	
 		#create file
-		filename_details=os.getcwd() + '/' + str(args.output_folder) + '/1_species/1_0_thickness_nff.stat'
+		filename_details=os.getcwd() + '/' + str(args.output_folder) + '/1_species/1_0_thickness.stat'
 		output_stat = open(filename_details, 'w')		
 		output_stat.write("[thickness statistics - written by thickness v" + str(version_nb) + "]\n")
 		output_stat.write("\n")
@@ -978,11 +978,11 @@ else:
 	write_xtc_annotation()
 	#write xvg and graphs
 	print " -writing xvg and graphs..."
-	write_thickness_nff_xvg()
-	graph_thickness_nff_xvg()	
+	write_thickness_xvg()
+	graph_thickness_xvg()	
 	if args.nb_smoothing>1:
-		write_thickness_nff_xvg_smoothed()
-		graph_thickness_nff_xvg_smoothed()
+		write_thickness_xvg_smoothed()
+		graph_thickness_xvg_smoothed()
 			
 #exit
 #====
