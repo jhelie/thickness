@@ -43,14 +43,14 @@ MDAnalysis.core.flags['use_KDTree_routines'] = False
 
 #create parser
 #=============
-version_nb="0.1.0"
+version_nb="0.1.1"
 parser = argparse.ArgumentParser(prog='thickness', usage='', add_help=False, formatter_class=argparse.RawDescriptionHelpFormatter, description=\
 '''
-********************************************
+****************************************
 v''' + version_nb + '''
 author: Jean Helie
-git: https://github.com/jhelie/thickness.git
-********************************************
+git: https://github.com/jhelie/thickness
+****************************************
 
 [ Description ]
 
